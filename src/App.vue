@@ -79,14 +79,13 @@ export default {
   padding: 3px;
 }
 
-
 .enabled {
   background-color: seagreen;
   color: lightgray;
 }
+
 .disabled {
   background-color: lightcoral;
   color: lightgray;
 }
-
 </style>

@@ -76,20 +76,12 @@ export default function endpointService() {
             action: "cmd",
             sender: conf.address,
             receiver: receiver,
-            data: "push"
-          })
-        );
-        conn.send(
-          JSON.stringify({
-            action: "cmd",
-            sender: conf.address,
-            receiver: receiver,
             data: "read"
           })
         );
-        // conn.send(
-        //   JSON.stringify({ action: "discover", sender: conf.address, data: "" })
-        // );
+        conn.send(
+          JSON.stringify({ action: "discover", sender: conf.address, data: "" })
+        );
         break;
       case "notify":
         console.log(received.Data);
