@@ -61,9 +61,9 @@ export default function endpointService() {
 
     let receiver = {
       domain: conf.address.domain,
-      type: "endpoint",
-      host: "pizero01",
-      address: "32",
+      type: "*",
+      host: "*",
+      address: "*",
       id: "*"
     };
 
@@ -71,16 +71,21 @@ export default function endpointService() {
     switch (received.Action) {
       case "accepted":
         endpointService.connected = true;
+        // conn.send(
+        //   JSON.stringify({
+        //     action: "cmd",
+        //     sender: conf.address,
+        //     receiver: receiver,
+        //     data: "read"
+        //   })
+        // );
         conn.send(
           JSON.stringify({
-            action: "cmd",
+            action: "discover",
             sender: conf.address,
             receiver: receiver,
-            data: "read"
+            data: ""
           })
-        );
-        conn.send(
-          JSON.stringify({ action: "discover", sender: conf.address, data: "" })
         );
         break;
       case "notify":
@@ -98,6 +103,9 @@ export default function endpointService() {
 
         console.log(endpointService.message);
         break;
+      case "inform":
+        endpointService.endpoints = received.Data;
+        break;
       case "read":
         break;
       default:
@@ -106,6 +114,8 @@ export default function endpointService() {
   }
 
   function fakeEndpoints() {
+    return [];
+    /*
     return [
       {
         name: "joran.endpoint.pizero01.32.7",
@@ -185,6 +195,7 @@ export default function endpointService() {
         }
       }
     ];
+    */
   }
 
   return { ...toRefs(endpointService), newConnection };
