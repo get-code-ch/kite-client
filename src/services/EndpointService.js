@@ -1,17 +1,16 @@
-import ConfigurationService from "@/services/ConfigurationService";
 import { reactive, toRefs } from "vue";
 
-export default function endpointService() {
-  let conf = ConfigurationService.getConfiguration();
+export default function endpointService(conf) {
   let conn;
 
   const endpointService = reactive({
     connected: false,
     message: "",
+    value: "",
     endpoints: fakeEndpoints()
   });
 
-  function newConnection() {
+  function newConnection(address, endpoint) {
     let url =
       (conf.ssl ? "wss://" : "ws://") + conf.server + ":" + conf.port + "/ws";
 
@@ -26,7 +25,7 @@ export default function endpointService() {
       conn.send(
         JSON.stringify({
           action: "register",
-          sender: conf.address,
+          sender: address,
           data: conf.api_key
         })
       );
@@ -34,30 +33,40 @@ export default function endpointService() {
     };
 
     conn.onmessage = function(event) {
-      connectionOnMessage(event);
+      connectionOnMessage(event, endpoint);
     };
 
     conn.onclose = function(event) {
-      connectionOnClose(event);
+      connectionOnClose(event, address);
     };
+  }
+
+  function readValue(endpoint, address) {
+    conn.send(
+      JSON.stringify({
+        action: "cmd",
+        sender: address,
+        receiver: endpoint.address,
+        data: "read"
+      })
+    );
   }
 
   function connectionOnError(event) {
     console.log("Error connecting server --> " + event.returnValue);
   }
 
-  function connectionOnClose(event) {
+  function connectionOnClose(event, address) {
     console.log("Connection closed by peer --> " + event.data);
     endpointService.connected = false;
     conn = null;
     setTimeout(() => {
-      newConnection();
+      newConnection(address);
     }, 5000);
   }
 
-  function connectionOnMessage(event) {
-    let received = { Action: "", Data: {}, Sender: {}, Receiver: {} };
-    received = JSON.parse(event.data);
+  function connectionOnMessage(event, endpoint) {
+    let received = JSON.parse(event.data);
 
     let receiver = {
       domain: conf.address.domain,
@@ -67,44 +76,36 @@ export default function endpointService() {
       id: "*"
     };
 
-    console.log(received);
-    switch (received.Action) {
+    //console.log(received);
+    switch (received.action) {
       case "accepted":
         endpointService.connected = true;
-        // conn.send(
-        //   JSON.stringify({
-        //     action: "cmd",
-        //     sender: conf.address,
-        //     receiver: receiver,
-        //     data: "read"
-        //   })
-        // );
-        conn.send(
-          JSON.stringify({
-            action: "discover",
-            sender: conf.address,
-            receiver: receiver,
-            data: ""
-          })
-        );
+        if (received.receiver.id === "*") {
+          conn.send(
+            JSON.stringify({
+              action: "discover",
+              sender: conf.address,
+              receiver: receiver,
+              data: ""
+            })
+          );
+        }
         break;
       case "notify":
-        console.log(received.Data);
-        endpointService.message = received.Data;
+        console.log(received.data);
+        endpointService.message = received.data;
         break;
       case "value":
-        endpointService.message =
-          received.Data.description +
-          " (" +
-          received.Data.type +
-          ") " +
-          received.Data.value +
-          (received.Data.unit ? " " + received.Data.unit : "");
+        if (match(received.sender, endpoint)) {
+          endpointService.value = received.data.unit
+            ? received.data.value.toFixed(2) + " " + received.data.unit
+            : received.data.value;
+        }
 
         console.log(endpointService.message);
         break;
       case "inform":
-        endpointService.endpoints = received.Data;
+        endpointService.endpoints = received.data;
         break;
       case "read":
         break;
@@ -113,17 +114,27 @@ export default function endpointService() {
     }
   }
 
+  function match(endpoint1, endpoint2) {
+    return (
+      endpoint1.domain === endpoint2.domain &&
+      endpoint1.type === endpoint2.type &&
+      endpoint1.host === endpoint2.host &&
+      endpoint1.address === endpoint2.address &&
+      endpoint1.id === endpoint2.id
+    );
+  }
+
   function fakeEndpoints() {
     return [];
     /*
     return [
       {
-        name: "joran.endpoint.pizero01.32.7",
-        description: "Commanded push button",
+        name: "fake.endpoint.host.32.7",
+        description: "Fake push button",
         address: {
-          domain: "joran",
+          domain: "fake",
           type: "endpoint",
-          host: "pizero01",
+          host: "host",
           address: "32",
           id: "7"
         },
@@ -140,63 +151,10 @@ export default function endpointService() {
         notification: {
           telegram: false
         }
-      },
-      {
-        name: "joran.endpoint.pizero01.72.AIN1",
-        description: "Ohm meter",
-        address: {
-          domain: "joran",
-          type: "endpoint",
-          host: "pizero01",
-          address: "72",
-          id: "AIN1"
-        },
-        ic: {
-          address: 72,
-          type: "ads1115",
-          name: "ADC",
-          description: "Analog/Digital Converter"
-        },
-        attributes: {
-          mode: "value",
-          unit: "[KOhm]",
-          scale: 0.001,
-          vcc: 5.07,
-          refresh_interval: 30,
-          reference: 330000,
-          convert: "OhmMeter"
-        },
-        notification: {
-          telegram: false
-        }
-      },
-      {
-        name: "joran.endpoint.pizero01.32.3",
-        description: "Yellow LED",
-        address: {
-          domain: "joran",
-          type: "endpoint",
-          host: "pizero01",
-          address: "32",
-          id: "3"
-        },
-        ic: {
-          address: 32,
-          type: "mcp23008",
-          name: "32",
-          description: "I/O expander module 0x20"
-        },
-        attributes: {
-          state: 0,
-          mode: "output"
-        },
-        notification: {
-          telegram: true
-        }
       }
     ];
     */
   }
 
-  return { ...toRefs(endpointService), newConnection };
+  return { ...toRefs(endpointService), newConnection, readValue };
 }

@@ -5,6 +5,7 @@
       v-for="endpoint in endpoints"
       :key="endpoint.name"
       :endpoint="endpoint"
+      :id="id++"
     />
   </div>
   <div class="footer" v-bind:class="[connected ? 'enabled' : 'disabled']">
@@ -15,6 +16,7 @@
 <script>
 import { onMounted } from "vue";
 import Endpoint from "@/components/Endpoint.vue";
+import ConfigurationService from "@/services/ConfigurationService";
 import endpointService from "@/services/EndpointService";
 
 export default {
@@ -23,12 +25,17 @@ export default {
     Endpoint
   },
   setup() {
+    let conf = ConfigurationService.getConfiguration();
+    let id = 1;
+
     onMounted(() => {
-      newConnection();
+      newConnection(conf.address);
     });
 
-    const { newConnection, endpoints, connected, message } = endpointService();
-    return { endpoints, connected, message };
+    const { newConnection, endpoints, connected, message } = endpointService(
+      conf
+    );
+    return { endpoints, connected, message, id };
   }
 };
 </script>
@@ -36,7 +43,13 @@ export default {
 <style scoped>
 .endpoints {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+@media (max-width: 550px) {
+  .endpoints {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 </style>

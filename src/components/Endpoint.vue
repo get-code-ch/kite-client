@@ -1,27 +1,76 @@
 <template>
-  <div class="endpoint">
+  <div class="endpoint" @click="endpointClicked(endpoint)">
     <!-- Display endpoint data -->
-    <span>{{ endpoint.name }}</span>
     <p>{{ endpoint.description }}</p>
+    <!--
+    <p>{{ endpoint.ic.description }}</p>
+    <p>{{ endpoint.attributes.mode }}</p>
+     -->
+    <p>{{ value }}</p>
+    <p>{{ message }}</p>
   </div>
 </template>
 
 <script>
+import endpointService from "@/services/EndpointService";
+import { onMounted } from "vue";
+import ConfigurationService from "@/services/ConfigurationService";
 export default {
   name: "Endpoint",
   props: {
-    endpoint: Object
+    endpoint: Object,
+    id: null
+  },
+  setup(props) {
+    let conf = ConfigurationService.getConfiguration();
+    let address = {
+      domain: conf.address.domain,
+      type: conf.address.type,
+      host: conf.address.host,
+      address: conf.address.address,
+      id: props.id + ""
+    };
+
+    onMounted(() => {
+      newConnection(address, props.endpoint.address);
+    });
+
+    function endpointClicked(endpoint) {
+      readValue(endpoint, address);
+    }
+
+    const {
+      newConnection,
+      readValue,
+      endpoints,
+      connected,
+      message,
+      value
+    } = endpointService(conf);
+    return { endpoints, connected, message, value, endpointClicked };
   }
 };
 </script>
 
 <style scoped>
+p {
+  font-size: 0.8em;
+  line-height: 1em;
+}
 .endpoint {
-  padding: 20px;
-  width: 250px;
-  cursor: pointer;
   border: 1px solid #2c3e50;
-  margin-bottom: 18px;
+  width: 250px;
+  height: 100px;
+  box-sizing: border-box;
+  margin: 0.25em;
+}
+@media (max-width: 550px) {
+  .endpoint {
+    width: 90%;
+    height: 100px;
+    box-sizing: border-box;
+    margin: 0.25em;
+  }
 }
 
 .endpoint:hover {
