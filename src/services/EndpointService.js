@@ -33,7 +33,7 @@ export default function endpointService(conf) {
     };
 
     conn.onmessage = function(event) {
-      connectionOnMessage(event, endpoint);
+      connectionOnMessage(event, address, endpoint);
     };
 
     conn.onclose = function(event) {
@@ -41,7 +41,7 @@ export default function endpointService(conf) {
     };
   }
 
-  function readValue(endpoint, address) {
+  function readValue(address, endpoint) {
     conn.send(
       JSON.stringify({
         action: "cmd",
@@ -65,7 +65,7 @@ export default function endpointService(conf) {
     }, 5000);
   }
 
-  function connectionOnMessage(event, endpoint) {
+  function connectionOnMessage(event, address, endpoint) {
     let received = JSON.parse(event.data);
 
     let receiver = {
@@ -77,6 +77,7 @@ export default function endpointService(conf) {
     };
 
     //console.log(received);
+    let sender = null;
     switch (received.action) {
       case "accepted":
         endpointService.connected = true;
@@ -92,17 +93,17 @@ export default function endpointService(conf) {
         }
         break;
       case "notify":
-        console.log(received.data);
-        endpointService.message = received.data;
+        if (address?.id === "*" || match(received.receiver, address)) {
+          endpointService.message = received.data;
+        }
         break;
       case "value":
-        if (match(received.sender, endpoint)) {
+        sender = stringToAddress(received.data?.name);
+        if (match(sender, endpoint)) {
           endpointService.value = received.data.unit
             ? received.data.value.toFixed(2) + " " + received.data.unit
             : received.data.value;
         }
-
-        console.log(endpointService.message);
         break;
       case "inform":
         endpointService.endpoints = received.data;
@@ -116,12 +117,35 @@ export default function endpointService(conf) {
 
   function match(endpoint1, endpoint2) {
     return (
-      endpoint1.domain === endpoint2.domain &&
-      endpoint1.type === endpoint2.type &&
-      endpoint1.host === endpoint2.host &&
-      endpoint1.address === endpoint2.address &&
-      endpoint1.id === endpoint2.id
+      endpoint1?.domain === endpoint2?.domain &&
+      endpoint1?.type === endpoint2?.type &&
+      endpoint1?.host === endpoint2?.host &&
+      endpoint1?.address === endpoint2?.address &&
+      endpoint1?.id === endpoint2?.id
     );
+  }
+
+  function stringToAddress(addressString) {
+    let address = { domain: "*", type: "*", host: "*", address: "*", id: "*" };
+    const addressArray = addressString.split(".");
+
+    if (addressArray.length > 0) {
+      address.domain = addressArray[0];
+    }
+    if (addressArray.length > 1) {
+      address.type = addressArray[1];
+    }
+    if (addressArray.length > 2) {
+      address.host = addressArray[2];
+    }
+    if (addressArray.length > 3) {
+      address.address = addressArray[3];
+    }
+    if (addressArray.length > 4) {
+      address.id = addressArray[4];
+    }
+
+    return address;
   }
 
   function fakeEndpoints() {

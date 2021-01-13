@@ -5,7 +5,8 @@
       v-for="endpoint in endpoints"
       :key="endpoint.name"
       :endpoint="endpoint"
-      :id="id++"
+      :idx="idx++"
+      :hidden="endpoint?.attributes.hidden"
     />
   </div>
   <div class="footer" v-bind:class="[connected ? 'enabled' : 'disabled']">
@@ -26,7 +27,7 @@ export default {
   },
   setup() {
     let conf = ConfigurationService.getConfiguration();
-    let id = 1;
+    let idx = 1;
 
     onMounted(() => {
       newConnection(conf.address);
@@ -35,7 +36,7 @@ export default {
     const { newConnection, endpoints, connected, message } = endpointService(
       conf
     );
-    return { endpoints, connected, message, id };
+    return { endpoints, connected, message, idx };
   }
 };
 </script>

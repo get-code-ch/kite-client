@@ -1,7 +1,9 @@
 <template>
   <div class="endpoint" @click="endpointClicked(endpoint)">
     <!-- Display endpoint data -->
-    <p>{{ endpoint.description }}</p>
+    <p>
+      <span v-if="address">{{ address?.id }} - </span>{{ endpoint.description }}
+    </p>
     <!--
     <p>{{ endpoint.ic.description }}</p>
     <p>{{ endpoint.attributes.mode }}</p>
@@ -19,16 +21,17 @@ export default {
   name: "Endpoint",
   props: {
     endpoint: Object,
-    id: null
+    idx: null
   },
   setup(props) {
     let conf = ConfigurationService.getConfiguration();
+
     let address = {
       domain: conf.address.domain,
       type: conf.address.type,
       host: conf.address.host,
       address: conf.address.address,
-      id: props.id + ""
+      id: props.idx + ""
     };
 
     onMounted(() => {
@@ -36,7 +39,7 @@ export default {
     });
 
     function endpointClicked(endpoint) {
-      readValue(endpoint, address);
+      readValue(address, endpoint);
     }
 
     const {
@@ -47,7 +50,7 @@ export default {
       message,
       value
     } = endpointService(conf);
-    return { endpoints, connected, message, value, endpointClicked };
+    return { endpoints, connected, message, value, address, endpointClicked };
   }
 };
 </script>
