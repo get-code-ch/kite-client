@@ -1,5 +1,9 @@
 <template>
-  <div class="endpoint" @click="endpointClicked(endpoint)">
+  <div
+    class="endpoint"
+    :class="value ? 'on' : 'off'"
+    @click="endpointClicked(endpoint)"
+  >
     <!-- Display endpoint data -->
     <p>
       <span v-if="address">{{ address?.id }} - </span>{{ endpoint.description }}
@@ -50,7 +54,15 @@ export default {
       message,
       value
     } = endpointService(conf);
-    return { endpoints, connected, message, value, address, endpointClicked };
+
+    return {
+      endpoints,
+      connected,
+      message,
+      value,
+      address,
+      endpointClicked
+    };
   }
 };
 </script>
@@ -67,6 +79,17 @@ p {
   box-sizing: border-box;
   margin: 0.25em;
 }
+
+.on {
+  background-color: seagreen;
+  color: lightgray;
+}
+
+.off {
+  background-color: lightcoral;
+  color: lightgray;
+}
+
 @media (max-width: 550px) {
   .endpoint {
     width: 90%;

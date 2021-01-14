@@ -20,7 +20,7 @@ export default function endpointService(conf) {
       connectionOnError(event);
     };
 
-    conn.onopen = function(event) {
+    conn.onopen = function() {
       // sending registration information
       conn.send(
         JSON.stringify({
@@ -29,7 +29,7 @@ export default function endpointService(conf) {
           data: conf.api_key
         })
       );
-      console.log(event);
+      // console.log(event);
     };
 
     conn.onmessage = function(event) {
@@ -88,6 +88,15 @@ export default function endpointService(conf) {
               sender: conf.address,
               receiver: receiver,
               data: ""
+            })
+          );
+        } else {
+          conn.send(
+            JSON.stringify({
+              action: "cmd",
+              sender: address,
+              receiver: endpoint,
+              data: "read"
             })
           );
         }
