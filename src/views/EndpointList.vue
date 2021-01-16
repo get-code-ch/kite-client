@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { onMounted } from "vue";
+import { onBeforeMount, onMounted } from "vue";
 import Endpoint from "@/components/Endpoint.vue";
 import ConfigurationService from "@/services/ConfigurationService";
 import endpointService from "@/services/EndpointService";
@@ -29,8 +29,13 @@ export default {
     let conf = ConfigurationService.getConfiguration();
     let idx = 1;
 
+    onBeforeMount(() => {
+      newConnection("browser", conf.address);
+    });
+
     onMounted(() => {
-      newConnection(conf.address);
+      console.log(conf.description + "mounted");
+      //newConnection("browser", conf.address);
     });
 
     const { newConnection, endpoints, connected, message } = endpointService(

@@ -10,7 +10,7 @@ export default function endpointService(conf) {
     endpoints: fakeEndpoints()
   });
 
-  function newConnection(address, endpoint) {
+  function newConnection(type, address, endpoint) {
     let url =
       (conf.ssl ? "wss://" : "ws://") + conf.server + ":" + conf.port + "/ws";
 
@@ -29,11 +29,10 @@ export default function endpointService(conf) {
           data: conf.api_key
         })
       );
-      // console.log(event);
     };
 
     conn.onmessage = function(event) {
-      connectionOnMessage(event, address, endpoint);
+      connectionOnMessage(event, type, address, endpoint);
     };
 
     conn.onclose = function(event) {
@@ -52,6 +51,17 @@ export default function endpointService(conf) {
     );
   }
 
+  function sendEvent(address, to, action, data) {
+    conn.send(
+      JSON.stringify({
+        action: action,
+        sender: address,
+        receiver: stringToAddress(to),
+        data: data
+      })
+    );
+  }
+
   function connectionOnError(event) {
     console.log("Error connecting server --> " + event.returnValue);
   }
@@ -65,7 +75,7 @@ export default function endpointService(conf) {
     }, 5000);
   }
 
-  function connectionOnMessage(event, address, endpoint) {
+  function connectionOnMessage(event, type, address, endpoint) {
     let received = JSON.parse(event.data);
 
     let receiver = {
@@ -78,10 +88,11 @@ export default function endpointService(conf) {
 
     //console.log(received);
     let sender = null;
+    let response = null;
     switch (received.action) {
       case "accepted":
         endpointService.connected = true;
-        if (received.receiver.id === "*") {
+        if (type === "browser") {
           conn.send(
             JSON.stringify({
               action: "discover",
@@ -117,7 +128,22 @@ export default function endpointService(conf) {
       case "inform":
         endpointService.endpoints = received.data;
         break;
-      case "read":
+      case "cmd":
+        switch (received.data) {
+          case "who":
+            if (type === "browser") {
+              response = JSON.stringify(address);
+              conn.send(
+                JSON.stringify({
+                  action: "inform",
+                  sender: type === "browser" ? conf.address : address,
+                  receiver: received.sender,
+                  data: response
+                })
+              );
+            }
+            break;
+        }
         break;
       default:
         console.log("Unknown action for this message --> " + received);
@@ -189,5 +215,5 @@ export default function endpointService(conf) {
     */
   }
 
-  return { ...toRefs(endpointService), newConnection, readValue };
+  return { ...toRefs(endpointService), newConnection, readValue, sendEvent };
 }

@@ -1,17 +1,14 @@
 <template>
+  <!-- :class="value ? 'on' : 'off'" -->
   <div
     class="endpoint"
-    :class="value ? 'on' : 'off'"
+    :class="endpointClass(endpoint, value)"
     @click="endpointClicked(endpoint)"
   >
     <!-- Display endpoint data -->
     <p>
-      <span v-if="address">{{ address?.id }} - </span>{{ endpoint.description }}
+      {{ endpoint.description }}
     </p>
-    <!--
-    <p>{{ endpoint.ic.description }}</p>
-    <p>{{ endpoint.attributes.mode }}</p>
-     -->
     <p>{{ value }}</p>
     <p>{{ message }}</p>
   </div>
@@ -19,7 +16,7 @@
 
 <script>
 import endpointService from "@/services/EndpointService";
-import { onMounted } from "vue";
+import { onMounted, onBeforeMount, onUpdated } from "vue";
 import ConfigurationService from "@/services/ConfigurationService";
 export default {
   name: "Endpoint",
@@ -38,17 +35,57 @@ export default {
       id: props.idx + ""
     };
 
+    onBeforeMount(() => {
+      newConnection("item", address, props.endpoint.address);
+    });
+
     onMounted(() => {
-      newConnection(address, props.endpoint.address);
+      console.log("Mounted for -> ", address);
+    });
+
+    onUpdated(() => {
+      console.log(props.endpoint?.description + " updated");
     });
 
     function endpointClicked(endpoint) {
-      readValue(address, endpoint);
+      switch (endpoint.attributes?.mode) {
+        case "output":
+          sendEvent(address, endpoint.name, "cmd", "reverse");
+          break;
+        case "input":
+        case "value":
+          readValue(address, endpoint);
+          break;
+        case "event":
+          sendEvent(
+            address,
+            endpoint.attributes?.to,
+            endpoint.attributes?.action,
+            endpoint.attributes?.data
+          );
+          break;
+        default:
+          console.log(
+            "no action configured fro this mode -->" + endpoint.attributes?.mode
+          );
+      }
+    }
+
+    function endpointClass(endpoint, value) {
+      console.log(endpoint + " " + value);
+      switch (endpoint.attributes?.mode) {
+        case "output":
+        case "input":
+          return value ? "on" : "off";
+        default:
+          return endpoint.attributes?.mode;
+      }
     }
 
     const {
       newConnection,
       readValue,
+      sendEvent,
       endpoints,
       connected,
       message,
@@ -61,7 +98,9 @@ export default {
       message,
       value,
       address,
-      endpointClicked
+      endpointClicked,
+      endpointClass,
+      sendEvent
     };
   }
 };
@@ -90,12 +129,30 @@ p {
   color: lightgray;
 }
 
+.value {
+  background-color: lightgray;
+  color: seagreen;
+}
+
+.event {
+  background-color: dodgerblue;
+  color: honeydew;
+}
+
+.undefined {
+  visibility: hidden;
+}
+
 @media (max-width: 550px) {
   .endpoint {
     width: 90%;
-    height: 100px;
+    height: 50px;
     box-sizing: border-box;
     margin: 0.25em;
+  }
+  p {
+    font-size: 0.5em;
+    line-height: 0.75em;
   }
 }
 
