@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!configuration.enabled">
+  <div v-if="!conf.enabled">
     <div class="clientsetup">
       <ClientSetup />
     </div>
@@ -9,10 +9,6 @@
       <router-link to="/">Endpoints</router-link>
       |
       <router-link to="/about">About</router-link>
-      <!--
-      |
-      <router-link to="/setup">Setup</router-link>
-      -->
     </div>
     <router-view />
   </div>
@@ -21,19 +17,16 @@
 <script>
 import ConfigurationService from "@/services/ConfigurationService";
 import ClientSetup from "@/components/ClientSetup";
+import { ref } from "vue";
 
 export default {
   components: {
     ClientSetup
   },
-  data() {
-    return {
-      endpoints: null,
-      configuration: null
-    };
-  },
-  created() {
-    this.configuration = ConfigurationService.getConfiguration();
+  setup() {
+    let conf = ref(null);
+    conf = ConfigurationService.getConfiguration();
+    return { conf };
   }
 };
 </script>

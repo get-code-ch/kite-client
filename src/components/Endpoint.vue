@@ -9,7 +9,7 @@
     <p>
       {{ endpoint.description }}
     </p>
-    <p>{{ value }}</p>
+    <p :hidden="typeof value === 'boolean'">{{ value }}</p>
     <p>{{ message }}</p>
   </div>
 </template>
@@ -48,6 +48,12 @@ export default {
     });
 
     function endpointClicked(endpoint) {
+      if (
+        endpoint.attributes.clickable !== undefined &&
+        !endpoint.attributes.clickable
+      ) {
+        return;
+      }
       switch (endpoint.attributes?.mode) {
         case "output":
           sendEvent(address, endpoint.name, "cmd", "reverse");
@@ -72,13 +78,22 @@ export default {
     }
 
     function endpointClass(endpoint, value) {
-      console.log(endpoint + " " + value);
+      //console.log(endpoint + " " + value);
+
+      let notClickable = "";
+      if (
+        endpoint.attributes.clickable !== undefined &&
+        !endpoint.attributes.clickable
+      ) {
+        notClickable = "not-clickable";
+      }
+
       switch (endpoint.attributes?.mode) {
         case "output":
         case "input":
-          return value ? "on" : "off";
+          return (value ? "on" : "off") + " " + notClickable;
         default:
-          return endpoint.attributes?.mode;
+          return endpoint.attributes?.mode + " " + notClickable;
       }
     }
 
@@ -112,12 +127,32 @@ p {
   line-height: 1em;
 }
 .endpoint {
-  border: 1px solid #2c3e50;
-  width: 250px;
-  height: 100px;
+  border: none;
+  width: 200px;
+  height: 90px;
   box-sizing: border-box;
   margin: 0.25em;
 }
+
+@media (max-width: 550px) {
+  .endpoint {
+    width: 90%;
+    height: 70px;
+    box-sizing: border-box;
+    margin: 0.25em;
+  }
+  p {
+    font-size: 0.8em;
+    line-height: 1em;
+  }
+}
+
+/*
+.endpoint:hover {
+  transform: scale(1.01);
+  box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.2);
+}
+*/
 
 .on {
   background-color: seagreen;
@@ -139,25 +174,11 @@ p {
   color: honeydew;
 }
 
+.not-clickable {
+  border-radius: 5px;
+}
+
 .undefined {
   visibility: hidden;
-}
-
-@media (max-width: 550px) {
-  .endpoint {
-    width: 90%;
-    height: 50px;
-    box-sizing: border-box;
-    margin: 0.25em;
-  }
-  p {
-    font-size: 0.5em;
-    line-height: 0.75em;
-  }
-}
-
-.endpoint:hover {
-  transform: scale(1.01);
-  box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.2);
 }
 </style>

@@ -72,7 +72,7 @@ export default function endpointService(conf) {
     conn = null;
     setTimeout(() => {
       newConnection(address);
-    }, 5000);
+    }, 15000);
   }
 
   function connectionOnMessage(event, type, address, endpoint) {

@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { onBeforeMount, onMounted } from "vue";
+import { onBeforeMount, watch } from "vue";
 import Endpoint from "@/components/Endpoint.vue";
 import ConfigurationService from "@/services/ConfigurationService";
 import endpointService from "@/services/EndpointService";
@@ -29,18 +29,18 @@ export default {
     let conf = ConfigurationService.getConfiguration();
     let idx = 1;
 
+    const { newConnection, endpoints, connected, message } = endpointService(
+      conf
+    );
+
     onBeforeMount(() => {
       newConnection("browser", conf.address);
     });
 
-    onMounted(() => {
-      console.log(conf.description + "mounted");
-      //newConnection("browser", conf.address);
+    watch(connected, () => {
+      console.log("connected changed to -->" + connected.value);
     });
 
-    const { newConnection, endpoints, connected, message } = endpointService(
-      conf
-    );
     return { endpoints, connected, message, idx };
   }
 };
