@@ -4,12 +4,13 @@
     class="endpoint"
     :class="endpointClass(endpoint, value)"
     @click="endpointClicked(endpoint)"
+    :title="endpoint.name"
   >
     <!-- Display endpoint data -->
     <p>
       {{ endpoint.description }}
     </p>
-    <p :hidden="typeof value === 'boolean'">{{ value }}</p>
+    <p :hidden="'boolean' === typeof value">{{ value }}</p>
     <p>{{ message }}</p>
   </div>
 </template>

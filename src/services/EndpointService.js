@@ -120,9 +120,19 @@ export default function endpointService(conf) {
       case "value":
         sender = stringToAddress(received.data?.name);
         if (match(sender, endpoint)) {
-          endpointService.value = received.data.unit
-            ? received.data.value.toFixed(2) + " " + received.data.unit
-            : received.data.value;
+          switch (typeof received.data.value) {
+            case "boolean":
+              endpointService.value = received.data.value;
+              break;
+            case "string":
+              endpointService.value =
+                received.data.value + " " + received.data.unit;
+              break;
+            case "number":
+              endpointService.value =
+                received.data.value.toFixed(2) + " " + received.data.unit;
+              break;
+          }
         }
         break;
       case "inform":
