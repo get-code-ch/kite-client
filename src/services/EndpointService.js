@@ -36,7 +36,7 @@ export default function endpointService(conf) {
     };
 
     conn.onclose = function(event) {
-      connectionOnClose(event, address);
+      connectionOnClose(event, type, address, endpoint);
     };
   }
 
@@ -66,12 +66,12 @@ export default function endpointService(conf) {
     console.log("Error connecting server --> " + event.returnValue);
   }
 
-  function connectionOnClose(event, address) {
+  function connectionOnClose(event, type, address, endpoint) {
     console.log("Connection closed by peer --> " + event.data);
     endpointService.connected = false;
     conn = null;
     setTimeout(() => {
-      newConnection(address);
+      newConnection(type, address, endpoint);
     }, 15000);
   }
 
