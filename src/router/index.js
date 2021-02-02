@@ -15,9 +15,10 @@ const routes = [
     component: About
   },
   {
-    path: "/setup",
+    path: "/setup/:param?",
     name: "Setup",
-    component: ClientSetup
+    component: ClientSetup,
+    props: true
   }
 ];
 

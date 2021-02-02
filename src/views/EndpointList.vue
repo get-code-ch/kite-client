@@ -6,7 +6,7 @@
       :key="endpoint.name"
       :endpoint="endpoint"
       :idx="idx++"
-      :hidden="endpoint?.attributes.hidden"
+      :hidden="endpoint?.ui?.hidden"
     />
   </div>
   <div class="footer" v-bind:class="[connected ? 'enabled' : 'disabled']">

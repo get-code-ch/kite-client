@@ -52,16 +52,18 @@
       </div>
     </div>
   </div>
+  <div v-if="param">link : {{ param }}</div>
   <div class="footer">{{ name }} - {{ api_key }}</div>
 </template>
 
 <script>
-import { reactive, toRefs } from "vue";
+import { onMounted, reactive, toRefs } from "vue";
 import ConfigurationService from "@/services/ConfigurationService";
 
 export default {
   name: "ClientSetup",
-  setup() {
+  props: ["param"],
+  setup(props) {
     const configuration = reactive({
       name: "",
       description: "",
@@ -77,6 +79,10 @@ export default {
         type: "browser",
         domain: ""
       }
+    });
+
+    onMounted(() => {
+      console.log("param: ", props?.param);
     });
 
     function addressToName() {

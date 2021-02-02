@@ -49,10 +49,7 @@ export default {
     });
 
     function endpointClicked(endpoint) {
-      if (
-        endpoint.attributes.clickable !== undefined &&
-        !endpoint.attributes.clickable
-      ) {
+      if (endpoint.ui.clickable !== undefined && !endpoint.ui.clickable) {
         return;
       }
       switch (endpoint.attributes?.mode) {
@@ -73,7 +70,7 @@ export default {
           break;
         default:
           console.log(
-            "no action configured fro this mode -->" + endpoint.attributes?.mode
+            "no action configured for this mode -->" + endpoint.attributes?.mode
           );
       }
     }
@@ -82,10 +79,7 @@ export default {
       //console.log(endpoint + " " + value);
 
       let notClickable = "";
-      if (
-        endpoint.attributes.clickable !== undefined &&
-        !endpoint.attributes.clickable
-      ) {
+      if (endpoint.ui.clickable !== undefined && !endpoint.ui.clickable) {
         notClickable = "not-clickable";
       }
 
