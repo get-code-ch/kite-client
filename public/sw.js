@@ -1,4 +1,4 @@
-const cacheName = "GoFortigate";
+const cacheName = "Kite";
 const contentToCache = [
   "/",
   "/index.html",
