@@ -1,0 +1,29 @@
+{
+  "name": "kite",
+  "short_name": "kite",
+  "icons": [
+    {
+      "src": "images/android-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/android-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "images/android-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+
+  ],
+  "prefer_related_applications": false,
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "any"
+}

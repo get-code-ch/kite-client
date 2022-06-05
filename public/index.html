@@ -4,7 +4,20 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+
+    <link rel="canonical" href="https://client.kite-project.net"/>
+
+    <!-- Color the status bar on mobile devices -->
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <!-- <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5"> -->
+
+    <meta name="application-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="manifest" href="manifest.json">
+
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
@@ -14,4 +27,16 @@
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>
+
+  <script type="application/javascript">
+    (function loadServiceWorker() {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("sw.js", {scope: "."})
+          .then(function (reg) {
+            console.log("Service Worker registred", reg);
+          });
+      }
+    })();
+  </script>
 </html>
